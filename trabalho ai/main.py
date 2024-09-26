@@ -1,6 +1,5 @@
 import heapq
 
-# Grafo das cidades com as distâncias entre elas
 graph = {
     'A': {'B': 1, 'C': 4},
     'B': {'A': 1, 'D': 2, 'E': 5},
@@ -10,7 +9,6 @@ graph = {
     'F': {'C': 3, 'E': 1}
 }
 
-# Estimativa heurística das distâncias em linha reta até o objetivo (cidade 'F')
 heuristic = {
     'A': 7,
     'B': 6,
@@ -20,33 +18,27 @@ heuristic = {
     'F': 0
 }
 
-# Função de busca gulosa de melhor escolha
 def greedy_best_first_search(graph, heuristic, start, goal):
-    # Usamos uma fila de prioridade para expandir o nó com menor heurística
     open_list = []
     heapq.heappush(open_list, (heuristic[start], start))
 
-    # Para manter o caminho que estamos seguindo
     came_from = {}
     came_from[start] = None
 
     while open_list:
-        # Pegamos o nó com menor valor heurístico
         current_heuristic, current_node = heapq.heappop(open_list)
         
         print(f"Visitando: {current_node}")
         
-        # Verificamos se chegamos ao objetivo
         if current_node == goal:
+            print(f"Objetivo {goal} alcançado!")
             break
 
-        # Expandimos os vizinhos
         for neighbor in graph[current_node]:
             if neighbor not in came_from:
                 heapq.heappush(open_list, (heuristic[neighbor], neighbor))
                 came_from[neighbor] = current_node
 
-    # Reconstruindo o caminho
     path = []
     current_node = goal
     while current_node is not None:
@@ -56,11 +48,17 @@ def greedy_best_first_search(graph, heuristic, start, goal):
 
     return path
 
-# Definimos o ponto de partida e o objetivo
-start = 'A'
-goal = 'E'
+def get_valid_city(prompt):
+    valid_cities = ['A', 'B', 'C', 'D', 'E', 'F']
+    while True:
+        city = input(prompt).upper()
+        if city in valid_cities:
+            return city
+        else:
+            print(f"Entrada inválida. Escolha entre {valid_cities}")
 
-# Executamos a busca gulosa
+start = get_valid_city("Ponto de partida (A, B, C, D, E, F): ")
+goal = get_valid_city("Objetivo (A, B, C, D, E, F): ")
+
 path = greedy_best_first_search(graph, heuristic, start, goal)
 print(f"Caminho encontrado: {path}")
-
