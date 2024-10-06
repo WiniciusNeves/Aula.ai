@@ -1,6 +1,9 @@
+import tkinter as tk
+from tkinter import ttk
 import heapq
 import networkx as nx
 import matplotlib.pyplot as plt
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 graph = {
     'A': {'B': 1, 'C': 4},
@@ -40,9 +43,7 @@ def greedy_best_first_search(graph, heuristic, start, goal):
 
     while open_list:
         current_heuristic, current_node = heapq.heappop(open_list)
-        print(f"Visitando: {current_node}")
         if current_node == goal:
-            print(f"Objetivo {goal} alcançado!")
             break
         for neighbor in graph[current_node]:
             if neighbor not in came_from:
@@ -57,32 +58,71 @@ def greedy_best_first_search(graph, heuristic, start, goal):
     path.reverse()
     return path
 
-def get_valid_city(prompt):
-    valid_cities = list(graph.keys())
-    while True:
-        city = input(prompt).upper()
-        if city in valid_cities:
-            return city
-
-def draw_graph(graph, path):
+def draw_graph(path):
     G = nx.Graph()
     for node in graph:
         for neighbor, weight in graph[node].items():
             G.add_edge(node, neighbor, weight=weight)
 
-    pos = nx.spring_layout(G)
-    nx.draw(G, pos, with_labels=True, node_color='lightblue', node_size=500, font_size=10, font_weight='bold')
+    plt.clf()
+    pos = nx.circular_layout(G)
+    num_nodes = len(G.nodes())
+    node_colors = plt.colormaps['tab20'](range(num_nodes))
+    edge_colors = ['#333333' if node not in path else '#FF5733' for node in G.nodes()]
+
+    nx.draw(G, pos, with_labels=True, node_size=700, font_size=10, font_weight='bold',
+            node_color=node_colors, edge_color=edge_colors, linewidths=1.5)
+
     edge_labels = nx.get_edge_attributes(G, 'weight')
     nx.draw_networkx_edge_labels(G, pos, edge_labels=edge_labels)
+
     if path:
         path_edges = list(zip(path, path[1:]))
-        nx.draw_networkx_edges(G, pos, edgelist=path_edges, edge_color='r', width=2)
-    plt.show()
+        nx.draw_networkx_edges(G, pos, edgelist=path_edges, edge_color='red', width=3)
 
-start = get_valid_city("Ponto de partida: ")
-goal = get_valid_city("Objetivo: ")
+    plt.title('Gráfico de Caminho', fontsize=14)
+    plt.axis('off')
 
-path = greedy_best_first_search(graph, heuristic, start, goal)
-print(f"Caminho encontrado: {path}")
+root = tk.Tk()
+root.title("Busca em Grafo")
 
-draw_graph(graph, path)
+origin_var = tk.StringVar()
+destination_var = tk.StringVar()
+result_var = tk.StringVar()
+
+frame_graph = tk.Frame(root)
+frame_graph.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+
+fig, ax = plt.subplots(figsize=(8, 6))
+canvas = FigureCanvasTkAgg(fig, master=frame_graph)
+canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
+
+frame_controls = tk.Frame(root)
+frame_controls.pack(side=tk.RIGHT, fill=tk.Y)
+
+ttk.Label(frame_controls, text="Origem:").pack(pady=10)
+origin_combobox = ttk.Combobox(frame_controls, textvariable=origin_var, values=list(graph.keys()))
+origin_combobox.pack(pady=5)
+origin_combobox.current(0)
+
+ttk.Label(frame_controls, text="Destino:").pack(pady=10)
+destination_combobox = ttk.Combobox(frame_controls, textvariable=destination_var, values=list(graph.keys()))
+destination_combobox.pack(pady=5)
+destination_combobox.current(1)
+
+search_button = ttk.Button(frame_controls, text="Buscar", command=lambda: on_search())
+search_button.pack(pady=20)
+
+ttk.Label(frame_controls, text="Melhor caminho:").pack(pady=10)
+result_label = ttk.Label(frame_controls, textvariable=result_var, wraplength=200)
+result_label.pack(pady=5)
+
+def on_search():
+    start = origin_var.get()
+    goal = destination_var.get()
+    path = greedy_best_first_search(graph, heuristic, start, goal)
+    draw_graph(path)
+    canvas.draw()
+    result_var.set(" → ".join(path))
+
+root.mainloop()
