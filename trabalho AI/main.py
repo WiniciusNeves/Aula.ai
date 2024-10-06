@@ -84,8 +84,9 @@ def draw_graph(path):
     plt.axis('off')
 
 root = tk.Tk()
-root.title("Busca em Grafo")
+root.title("Busca Gulosa melhor caminho")
 
+ttk.Label(root, text="Busca Gulosa melhor caminho").pack(pady=10)
 origin_var = tk.StringVar()
 destination_var = tk.StringVar()
 result_var = tk.StringVar()
