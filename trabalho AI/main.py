@@ -6,7 +6,10 @@ import networkx as nx
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
-# Define o grafo
+# Comando para instalar a biblioteca:
+# pip install networkx matplotlib
+
+## Define o grafo
 graph = {
     'A': {'B': 1, 'C': 4},
     'B': {'A': 1, 'D': 2, 'E': 5},
