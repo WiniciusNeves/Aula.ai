@@ -127,3 +127,5 @@ def on_search():
     result_var.set(" → ".join(path))
 
 root.mainloop()
+
+pip install networkx matplotlib
